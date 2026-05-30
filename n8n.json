@@ -1,0 +1,821 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        -16
+      ],
+      "id": "e96fc10c-22a0-4be8-a3eb-05a497f0d637",
+      "name": "Telegram Trigger",
+      "webhookId": "1edff222-7cc2-4fa7-b393-a4e21a6857da",
+      "credentials": {
+        "telegramApi": {
+          "id": "MHBdXEgU7MxxNTOJ",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "z-ai/glm-4.5-air:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        208
+      ],
+      "id": "1c1d2e60-8bc3-48b2-8056-134e112f422b",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "9PSwNgAFLXgTCo6I",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        192,
+        240
+      ],
+      "id": "f63782ec-f1fe-4e7d-8af8-d1ad7adbfbc2",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.replace(/\"/g, '').trim() }}",
+                    "rightValue": "PRD",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f34ea291-3e41-427f-bb3b-7bf64d7636a7"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e3fd026a-e472-4df6-9a3f-e9333ff87b9d",
+                    "leftValue": "={{ $json.output.replace(/\"/g, '').trim() }}",
+                    "rightValue": "TRD",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "40aa3514-bece-4d06-abd7-855cb802e8e7",
+                    "leftValue": "={{ $json.output.replace(/\"/g, '').trim() }}",
+                    "rightValue": "Test Case",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        -16
+      ],
+      "id": "f53974cd-266e-4755-b5e7-05cb9b6532a6",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        288
+      ],
+      "id": "00aadf06-3963-4f89-b9e0-bafdc16e6f9b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Et32I2OrjNU6cO8n",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "Kamu adalah Product Analyst senior yang berpengalaman.\nTugasmu adalah membuat PRD (Product Requirements Document) \nyang profesional dan terstruktur. Jika kamu dikasih link website pelajarilah terlebih dahulu web tersebut\n\nKetika menerima permintaan, buat PRD dengan format berikut:\n\n# PRD - [Nama Fitur]\n\n## 1. Overview\nDeskripsi singkat fitur dan tujuannya.\n\n## 2. User Stories\n- Sebagai [role], saya ingin [aksi], agar [tujuan]\n(minimal 3 user stories)\n\n## 3. Acceptance Criteria\n- [ ] Kriteria 1\n- [ ] Kriteria 2\n(minimal 5 kriteria)\n\n## 4. Out of Scope\n- Hal yang tidak termasuk dalam fitur ini\n\n## 5. Dependencies\n- Sistem atau fitur lain yang dibutuhkan\n\nGunakan Bahasa Indonesia yang profesional dan mudah dipahami.\nJika informasi kurang, buat asumsi yang masuk akal dan cantumkan. \nBuat outputnya lebih ringkas, padat, dan jelas untuk menghindari pengiriman data yang tidak berhasil"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1088,
+        -416
+      ],
+      "id": "57cde205-d8b5-425a-a2f7-a360a4e6c612",
+      "name": "AGENT PRD"
+    },
+    {
+      "parameters": {
+        "chatId": "584328610",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1488,
+        -288
+      ],
+      "id": "1cc828c4-01e0-40e5-9095-88e4279a9c99",
+      "name": "Send a text message",
+      "webhookId": "1b22f9b8-92d2-4586-ba08-117697d62353",
+      "credentials": {
+        "telegramApi": {
+          "id": "MHBdXEgU7MxxNTOJ",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "z-ai/glm-4.5-air:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        944,
+        -144
+      ],
+      "id": "4c6c7ef1-56c4-43f7-b0d1-23d861f5aeaa",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "9PSwNgAFLXgTCo6I",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "Kamu adalah Technical Analyst senior yang berpengalaman.\nTugasmu adalah membuat TRD (Technical Requirements Document)\nyang detail dan akurat. Jika kamu dikasih link website, Kamu bisa pelajari dulu web atau url project yang dikasih. Kalo tidak ada URL atau web. buat basic saja dulu.\n\nKetika menerima permintaan, buat TRD dengan format berikut:\n\n# TRD - [Nama Fitur]\n\n## 1. Technical Overview\nRingkasan teknis dari fitur yang akan dibangun.\n\n## 2. Technical Requirements\n- REQ-001: [kebutuhan teknis]\n- REQ-002: [kebutuhan teknis]\n(minimal 5 requirements)\n\n## 3. System Architecture\nDeskripsi komponen sistem yang terlibat.\n\n## 4. API Contracts\n### Endpoint: [nama endpoint]\n- Method: GET/POST/PUT/DELETE\n- URL: /api/v1/[resource]\n- Request Body: { ... }\n- Response: { ... }\n- Error Codes: 400, 401, 404, 500\n\n## 5. Database Schema\nTabel dan kolom yang dibutuhkan (jika relevan).\n\n## 6. Risks & Constraints\n- [risiko teknis dan cara mitigasinya]\n\nGunakan bahasa teknis yang presisi dan jelas.\nJika informasi kurang, buat asumsi teknis yang wajar."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1072,
+        0
+      ],
+      "id": "ba42fd9a-9d8e-493f-9011-dd6c4893818b",
+      "name": "AGENT TRD"
+    },
+    {
+      "parameters": {
+        "chatId": "584328610",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1504,
+        0
+      ],
+      "id": "8bc539da-5118-4af4-921e-d6315c49ad40",
+      "name": "Send a text message1",
+      "webhookId": "30dd01c6-49ba-4b2e-8230-ba0df575014f",
+      "credentials": {
+        "telegramApi": {
+          "id": "MHBdXEgU7MxxNTOJ",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "Kamu adalah classifier untuk tim QA yang sudah bekerja 10 tahun. Kategorikan permintaan user ke salah satu:\n- PRD\n- TRD\n- Test Case\n\nBalas HANYA dengan satu kata kategori tersebut.\nJangan tambah kalimat lain apapun. \n\nJika pertanyaan user tidak relevan dengan tugasmu,\nbalas dengan: \"Maaf tugas saya sebagi QA Asistant, tidak mempu mengolah permintaan anda, karena diluar konteks.\"\n\nSelalu balas dalam Bahasa Indonesia kecuali \nuser meminta dalam bahasa lain."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        80,
+        -16
+      ],
+      "id": "481a55e9-66e9-4bf3-b91a-446b703dcd5a",
+      "name": "Agent Classifier"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-v4-flash:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        896,
+        592
+      ],
+      "id": "5bcbcab4-ca8c-478c-b1d9-056022be2607",
+      "name": "OpenRouter Chat Model2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "9PSwNgAFLXgTCo6I",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "Kamu adalah QA Engineer senior yang berpengalaman.\nTugasmu adalah membuat test cases yang komprehensif dan terstruktur.\n\nJika kamu dikasih link website, Kamu bisa pelajari dulu web atau url project yang dikasih. Kalo tidak ada URL atau web. buat basic saja dulu. \n\njika sebelumnya kamu melihat ada ganerate TRD atau PRD pakai itu untuk buat test case juga. Namun jika tidak pakai yang basic dulu saja\n\nKetika menerima permintaan, output HARUS dalam format JSON array \nberikut ini SAJA, tanpa teks tambahan apapun diluar JSON:\n\n[\n  {\n    \"id_test_case\": \"TC-001\",\n    \"menu_modul_fitur\": \"nama menu/modul/fitur yang diuji\",\n    \"test_case\": \"deskripsi singkat skenario pengujian\",\n    \"category\": \"Positive\",\n    \"data\": \"data input yang digunakan untuk pengujian\",\n    \"step_by_step\": \"1. Langkah pertama\\n2. Langkah kedua\\n3. Langkah ketiga\",\n    \"expected_result\": \"hasil yang diharapkan secara spesifik\",\n    \"actual_result\": \"\",\n    \"state\": \"Not Executed\"\n  }\n]\n\nAturan pembuatan test cases:\n- Minimal 8 test cases\n- Wajib ada Positive, Negative, dan Edge Case\n- Category hanya boleh: Positive, Negative, Edge Case\n- State selalu diisi: Not Executed (karena belum dijalankan)\n- Actual Result dikosongkan (akan diisi saat eksekusi)\n- Steps harus jelas dan bisa diikuti siapapun\n- Expected result harus spesifik dan terukur\n- Data harus realistis sesuai konteks fitur\n\nContoh category:\n- Positive: input valid, happy path\n- Negative: input invalid, error handling\n- Edge Case: batas maksimum, karakter khusus, field kosong"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1056,
+        400
+      ],
+      "id": "477cccba-00f4-44eb-9b19-c0dbb32240b4",
+      "name": "AGENT TEST CASE"
+    },
+    {
+      "parameters": {
+        "chatId": "584328610",
+        "text": "=✅ Test cases berhasil dibuat dan disimpan!\n\n📋 Silakan cek hasilnya di:\nhttps://docs.google.com/spreadsheets/d/1_vZIn66U5Rai16ENuBm5IJFh1mdA5pweAMhOAb3V5x4/edit\n\nTotal test cases: {{ $json.total }}  TC",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2032,
+        368
+      ],
+      "id": "afce8213-2459-4710-a900-deed937dc4d9",
+      "name": "Send a text message2",
+      "webhookId": "30dd01c6-49ba-4b2e-8230-ba0df575014f",
+      "credentials": {
+        "telegramApi": {
+          "id": "MHBdXEgU7MxxNTOJ",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1232,
+        -144
+      ],
+      "id": "2d78927f-648f-420b-8dac-b584cfa76b7f",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1184,
+        208
+      ],
+      "id": "89f0d0c4-a4fb-4bb5-8c77-3795d698df01",
+      "name": "Simple Memory2"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1216,
+        672
+      ],
+      "id": "b1ff1025-e601-4da8-abec-88dc712b9558",
+      "name": "Simple Memory3"
+    },
+    {
+      "parameters": {
+        "model": "z-ai/glm-4.5-air:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        192
+      ],
+      "id": "89cfbb71-e3c7-4361-ada2-ec66535c3071",
+      "name": "OpenRouter Chat Model4",
+      "credentials": {
+        "openRouterApi": {
+          "id": "9PSwNgAFLXgTCo6I",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        704
+      ],
+      "id": "cb4a499d-30ea-4a1b-81f6-f87bfcb0a627",
+      "name": "OpenRouter Chat Model5",
+      "credentials": {
+        "openRouterApi": {
+          "id": "9PSwNgAFLXgTCo6I",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst output = $input.first().json.output;\nconst cleaned = output.replace(/```json|```/g, '').trim();\nconst parsed = JSON.parse(cleaned);\nreturn parsed.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        608
+      ],
+      "id": "93ea17ff-2112-4a58-a0ef-f550b6109d9a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1_vZIn66U5Rai16ENuBm5IJFh1mdA5pweAMhOAb3V5x4",
+          "mode": "list",
+          "cachedResultName": "Test case agent generate",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_vZIn66U5Rai16ENuBm5IJFh1mdA5pweAMhOAb3V5x4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_vZIn66U5Rai16ENuBm5IJFh1mdA5pweAMhOAb3V5x4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID TEST CASE": "={{ $json.id_test_case }}",
+            "MENU/MODEL/FEATURES": "={{ $json.menu_modul_fitur }}",
+            "TEST CASE": "={{ $json.test_case }}",
+            "CATEGORY": "={{ $json.category }}",
+            "DATA": "={{ $json.data }}",
+            "STEP by STEP": "={{ $json.step_by_step }}",
+            "EXPECTED RESULT": "={{ $json.expected_result }}",
+            "ACTUAL RESULT": "={{ $json.actual_result }}",
+            "STATE": "={{ $json.state }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID TEST CASE",
+              "displayName": "ID TEST CASE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "MENU/MODEL/FEATURES",
+              "displayName": "MENU/MODEL/FEATURES",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TEST CASE",
+              "displayName": "TEST CASE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CATEGORY",
+              "displayName": "CATEGORY",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DATA",
+              "displayName": "DATA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "STEP by STEP",
+              "displayName": "STEP by STEP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "EXPECTED RESULT",
+              "displayName": "EXPECTED RESULT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ACTUAL RESULT",
+              "displayName": "ACTUAL RESULT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "STATE",
+              "displayName": "STATE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1648,
+        336
+      ],
+      "id": "4b42bb53-2bcd-4aec-99c1-d635befc8b6f",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "5hQS7F5hM1KnAP4e",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nreturn [{ json: { total: $input.all().length } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1856,
+        336
+      ],
+      "id": "d64e2bb4-ba5d-4e58-bba4-d3ef3befd5c7",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Agent Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agent Classifier",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "AGENT PRD",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AGENT TRD",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AGENT TEST CASE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent Classifier",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AGENT PRD": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AGENT PRD",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGENT TRD": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent Classifier": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AGENT TEST CASE",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGENT TEST CASE": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AGENT PRD",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "AGENT TRD",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "AGENT TEST CASE",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AGENT TRD",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AGENT TEST CASE",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da5a44c0895e35150f52a638ca42703e636f50134a83c4324554bc686d77081e"
+  }
+}
